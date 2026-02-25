@@ -1,0 +1,220 @@
+.container {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* 顶部固定栏 */
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.searchBar {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.locationSelector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  margin: 0 12px;
+  --background: #f8f9fa;
+  --border-radius: 20px;
+}
+
+.filterButton {
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #666;
+}
+
+/* 快捷筛选 */
+.quickFilters {
+  padding: 12px;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.divider {
+  height: 24px;
+  margin: 0 16px;
+  border-color: #ddd;
+}
+
+.dateTag {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 酒店列表 */
+.listContainer {
+  padding: 12px;
+}
+
+.hotelCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
+}
+
+.hotelCard:hover {
+  transform: translateY(-2px);
+}
+
+.hotelImageContainer {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.hotelImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.discountTag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-weight: bold;
+}
+
+.hotelInfo {
+  padding: 16px;
+}
+
+.hotelName {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  max-width: 70%;
+}
+
+.priceSection {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.currentPrice {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff6b6b;
+  display: block;
+}
+
+.originalPrice {
+  font-size: 12px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.ratingSection {
+  margin: 8px 0;
+  gap: 8px;
+}
+
+.starIcon {
+  color: #ffc107;
+  font-size: 14px;
+}
+
+.rating {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.reviewCount {
+  font-size: 12px;
+  color: #999;
+}
+
+.address {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.facilities {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.facilityTag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.moreFacilities {
+  font-size: 11px;
+  color: #666;
+  margin-left: 4px;
+}
+
+.loadingText {
+  padding: 24px;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+}
+
+/* 筛选面板 */
+.filterPanel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.filterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
