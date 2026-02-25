@@ -1,12 +1,24 @@
-export const mockHotelList = Array.from({ length: 50 }, (_, index) => ({
-  id: index + 1,
-  name: `北京王府井大酒店 ${index + 1}号店`,
-  rating: 4.5 + Math.random() * 0.5,
-  reviewCount: Math.floor(Math.random() * 1000) + 100,
-  address: `北京市东城区王府井大街${index + 1}号`,
-  price: Math.floor(Math.random() * 500) + 300,
-  originalPrice: Math.floor(Math.random() * 200) + 800,
-  discount: Math.floor(Math.random() * 100) + 20,
+const cities = ['北京', '上海', '广州', '深圳', '杭州', '成都', '西安', '重庆'];
+const hotelTypes = ['经济型', '舒适型', '豪华型', '商务型', '度假型', '民宿'];
+const hotelNames = [
+  '王府井大酒店', '外滩华尔道夫', '珠江新城威斯汀', 
+  '西湖国宾馆', '春熙路君悦', '大唐不夜城酒店'
+];
+
+export const mockHotelList = Array.from({ length: 50 }, (_, index) => {
+  const city = cities[index % cities.length];
+  const type = hotelTypes[index % hotelTypes.length];
+  const name = `${city}${hotelNames[index % hotelNames.length]}${index % 5 + 1}号店`;
+  
+  return {
+    id: index + 1,
+    name,
+    rating: Number((4 + Math.random()).toFixed(1)), // 4.0-5.0的评分
+    reviewCount: Math.floor(Math.random() * 1000) + 100,
+    address: `${city}${['区', '路', '大街'][index % 3]}${index + 1}号`,
+    price: Math.floor(Math.random() * 400) + 200,
+    originalPrice: Math.floor(Math.random() * 200) + 600,
+    discount: Math.floor(Math.random() * 80) + 20,
   type: ['经济型', '舒适型', '豪华型', '商务型'][index % 4],
   images: [
     `https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=300&fit=crop&${index}`,
@@ -25,4 +37,5 @@ export const mockHotelList = Array.from({ length: 50 }, (_, index) => ({
   latitude: 39.9042 + Math.random() * 0.1,
   longitude: 116.4074 + Math.random() * 0.1,
   distance: (Math.random() * 10).toFixed(1) + 'km',
-}));
+}
+});
