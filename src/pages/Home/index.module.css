@@ -95,3 +95,22 @@
   left: 12px;
   right: 12px;
 }
+
+
+/* 快捷城市选中状态 */
+.selectedCity {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  font-weight: bold;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* 搜索按钮禁用状态 */
+.searchButton :global(.adm-button) {
+  transition: all 0.3s ease;
+}
+
+.searchButton :global(.adm-button[disabled]) {
+  opacity: 0.6;
+}

@@ -9,7 +9,8 @@ import {
   InfiniteScroll,
   Selector,
   Tag,
-  Divider
+  Divider,
+  Toast
 } from 'antd-mobile';
 import { 
   FilterOutline, 
@@ -19,23 +20,24 @@ import {
   DownOutline 
 } from 'antd-mobile-icons';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { mockHotelList } from './mockData'; // 我们马上创建这个模拟数据文件
+import { mockHotelList } from './mockData'; 
 import styles from './index.module.css';
 
 const HotelList = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // 从URL查询参数或默认值初始化搜索条件
+  // 1. 从URL查询参数初始化搜索条件 (这是数据流的起点)
   const queryParams = new URLSearchParams(location.search);
-  const [searchParams, setSearchParams] = useState({
+  const initialSearchParams = {
     city: queryParams.get('city') || '北京',
-    checkIn: queryParams.get('checkIn') || '2024-02-27',
-    checkOut: queryParams.get('checkOut') || '2024-02-28',
+    checkIn: queryParams.get('checkIn') || '2026-02-27', // 建议更新为接近的日期
+    checkOut: queryParams.get('checkOut') || '2026-02-28',
     keyword: queryParams.get('keyword') || '',
-  });
+  };
+  const [searchParams, setSearchParams] = useState(initialSearchParams);
 
-  // 筛选状态
+  // 2. 筛选状态 (用于列表页顶部的快捷筛选)
   const [filters, setFilters] = useState({
     priceRange: [200, 800] as [number, number],
     starRating: [] as number[],
@@ -43,62 +45,108 @@ const HotelList = () => {
     sortBy: 'default' as 'default' | 'priceAsc' | 'priceDesc' | 'rating',
   });
 
-  // 列表数据 & 分页
-  const [hotels, setHotels] = useState<any[]>([]);
+  // 3. 列表数据 & 分页 (存储经过筛选的最终结果)
+  const [filteredAndSortedHotels, setFilteredAndSortedHotels] = useState<any[]>([]);
+  const [displayHotels, setDisplayHotels] = useState<any[]>([]); // 当前显示的数据（用于无限滚动）
   const [hasMore, setHasMore] = useState(true);
   const pageRef = useRef(1);
   const pageSize = 10;
 
-  // 详细筛选面板的显示状态
+  // 4. 详细筛选面板的显示状态
   const [filterVisible, setFilterVisible] = useState(false);
 
-  // 初始化加载数据
+  // ========== 核心：数据筛选与排序函数 ==========
+  const filterAndSortHotels = useCallback(() => {
+    let result = [...mockHotelList];
+
+    // 1) 根据URL参数（来自首页）进行筛选
+    if (searchParams.city && searchParams.city !== '全部') {
+      // 假设 mockHotelList 中的对象有 `city` 属性
+      result = result.filter(hotel => hotel.city === searchParams.city);
+    }
+    if (searchParams.keyword) {
+      const kw = searchParams.keyword.toLowerCase();
+      result = result.filter(hotel => 
+        hotel.name.toLowerCase().includes(kw) || 
+        hotel.address.toLowerCase().includes(kw)
+      );
+    }
+
+    // 2) 根据列表页顶部的筛选器进行筛选 (这里以价格为例)
+    const [minPrice, maxPrice] = filters.priceRange;
+    result = result.filter(hotel => hotel.price >= minPrice && hotel.price <= maxPrice);
+
+    if (filters.starRating.length > 0) {
+      result = result.filter(hotel => filters.starRating.includes(Math.floor(hotel.rating)));
+    }
+
+    // 3) 排序
+    switch (filters.sortBy) {
+      case 'priceAsc':
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case 'priceDesc':
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+   
+      default:
+        // 默认排序，例如按ID或评分
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+    }
+
+    setFilteredAndSortedHotels(result);
+    // 重置分页
+    pageRef.current = 1;
+    const initialDisplay = result.slice(0, pageSize);
+    setDisplayHotels(initialDisplay);
+    setHasMore(initialDisplay.length >= pageSize && initialDisplay.length < result.length);
+
+  }, [searchParams, filters]); // 当搜索参数或筛选条件变化时重新执行
+
+  // ========== 副作用：当筛选条件变化时，重新计算数据 ==========
   useEffect(() => {
-    loadInitialData();
-  }, []);
+    filterAndSortHotels();
+  }, [filterAndSortHotels]); // 依赖项是 memoized 的函数
 
-  const loadInitialData = () => {
-    // 模拟首次加载
-    const initialData = mockHotelList.slice(0, pageSize);
-    setHotels(initialData);
-    pageRef.current = 2;
-    setHasMore(initialData.length >= pageSize);
-  };
-
-  // 加载更多的函数（用于 InfiniteScroll 组件）
+  // ========== 无限滚动加载更多 ==========
   const loadMore = useCallback(async () => {
     // 模拟网络请求延迟
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    const start = (pageRef.current - 1) * pageSize;
+    const start = pageRef.current * pageSize;
     const end = start + pageSize;
-    const newData = mockHotelList.slice(start, end);
+    const newData = filteredAndSortedHotels.slice(start, end);
     
     if (newData.length > 0) {
-      setHotels(prev => [...prev, ...newData]);
+      setDisplayHotels(prev => [...prev, ...newData]);
       pageRef.current += 1;
-      setHasMore(end < mockHotelList.length);
+      setHasMore(end < filteredAndSortedHotels.length);
     } else {
       setHasMore(false);
     }
-  }, []);
+  }, [filteredAndSortedHotels]); // 依赖筛选后的总数据
 
-  // 处理搜索
+  // ========== 事件处理函数 ==========
+  // 处理顶部搜索框变化
   const handleSearch = (value: string) => {
     setSearchParams(prev => ({ ...prev, keyword: value }));
-    // 在实际项目中，这里会触发重新查询
+    // 注意：filterAndSortHotels 会通过 useEffect 自动触发
   };
 
-  // 处理筛选变化
+  // 处理列表页内筛选变化
   const handleFilterChange = (key: keyof typeof filters, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-    // 重置分页并重新加载数据
-    pageRef.current = 1;
-    setHotels([]);
-    // 这里应该触发带有筛选条件的重新查询
-    setTimeout(() => {
-      loadInitialData();
-    }, 300);
+    // 注意：filterAndSortHotels 会通过 useEffect 自动触发
+  };
+
+  // 处理城市选择 (简单示例)
+  const handleCitySelect = (city: string) => {
+    setSearchParams(prev => ({ ...prev, city }));
+    Toast.show(`已切换至: ${city}`);
   };
 
   // 跳转到详情页
@@ -121,23 +169,22 @@ const HotelList = () => {
       </div>
       
       <div className={styles.hotelInfo}>
-       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <h3 className={styles.hotelName}>{hotel.name}</h3>
           <div className={styles.priceSection}>
             <span className={styles.currentPrice}>¥{hotel.price}</span>
             <span className={styles.originalPrice}>¥{hotel.originalPrice}</span>
           </div>
         </div>
-        
-       <div style={{ display: 'flex', alignItems: 'center' }} className={styles.ratingSection}>
-         <StarFill className={styles.starIcon} />
-        <span className={styles.rating}>{hotel.rating}</span>
-        <span className={styles.reviewCount}>({hotel.reviewCount}条评价)</span>
-         <Tag color='primary' fill='outline'>
-      {hotel.type}
-          </Tag>
 
+        
+               <div style={{ display: 'flex', alignItems: 'center' }} className={styles.ratingSection}>
+          <StarFill className={styles.starIcon} />
+          <span className={styles.rating}>{hotel.rating}</span>
+          <span className={styles.reviewCount}>({hotel.reviewCount}条评价)</span>
+          <Tag color='primary' fill='outline'>
+            {hotel.type}
+          </Tag>
         </div>
 
         
@@ -147,7 +194,7 @@ const HotelList = () => {
         
         <div className={styles.facilities}>
           {hotel.facilities.slice(0, 3).map((facility: string, index: number) => (
-            <Tag key={index} fill='outline' className={styles.facilityTag}>
+            <Tag key={index}fill='outline' className={styles.facilityTag}>
               {facility}
             </Tag>
           ))}
@@ -163,78 +210,77 @@ const HotelList = () => {
     <div className={styles.container}>
       {/* 顶部固定搜索栏 */}
       <div className={styles.stickyHeader}>
-       <div style={{ display: 'flex', alignItems: 'center' }} className={styles.searchBar}>
-  <div 
-    className={styles.locationSelector}
-    onClick={() => {/* 实现城市选择 */}}
-  >
-    <EnvironmentOutline />
-    <span>{searchParams.city}</span>
-    <DownOutline fontSize={12} />
-  </div>
-  
-  <SearchBar
-    placeholder='酒店名、地点、关键词'
-    value={searchParams.keyword}
-    onChange={handleSearch}
-    className={styles.searchInput}
-  />
-  
-  <div 
-    className={styles.filterButton}
-    onClick={() => setFilterVisible(true)}
-  >
-    <FilterOutline />
-  </div>
-</div>
+                       <div style={{ display: 'flex', alignItems: 'center' }} className={styles.searchBar}>
+          <div className={styles.locationSelector}
+            onClick={() => handleCitySelect(searchParams.city === '北京' ? '上海' : '北京')}
+          >
+            <EnvironmentOutline />
+            <span>{searchParams.city}</span>
+            <DownOutline fontSize={12} />
+          </div>
+          
+          <SearchBar
+            placeholder='酒店名、地点、关键词'
+            value={searchParams.keyword}
+            onChange={handleSearch}
+            className={styles.searchInput}
+          />
+          
+          <div 
+            className={styles.filterButton}
+            onClick={() => setFilterVisible(true)}
+          >
+            <FilterOutline />
+          </div>
+        </div>
+
 
 
         {/* 快捷筛选条件 */}
-        <div style={{ display: 'flex', flexWrap: 'wrap' }} className={styles.quickFilters}>
-  <Selector
-    style={{ '--border-radius': '20px' }}
-    columns={3}
-    options={[
-      { label: '价格最低', value: 'priceAsc' },
-      { label: '评分最高', value: 'rating' },
-      { label: '距离最近', value: 'distance' },
-    ]}
-    value={[filters.sortBy]}
-    onChange={(v) => v.length > 0 && handleFilterChange('sortBy', v[0])}
-  />
-  
-  <Divider direction='vertical' className={styles.divider} />
-  
-  <Tag 
-    className={styles.dateTag}
-    onClick={() => {/* 实现日期选择 */}}
-  >
-    <CalendarOutline />
-    {searchParams.checkIn} - {searchParams.checkOut}
-  </Tag>
-</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap' }} className={styles.quickFilters}>
+          <Selector
+            style={{ '--border-radius': '20px' }}
+            columns={3}
+            options={[
+              { label: '价格最低', value: 'priceAsc' },
+              { label: '评分最高', value: 'rating' },
+              { label: '距离最近', value: 'distance' },
+            ]}
+            value={[filters.sortBy]}
+            onChange={(v) => v.length > 0 && handleFilterChange('sortBy', v[0])}
+          />
+          
+          <Divider direction='vertical' className={styles.divider} />
+          
+          <Tag 
+            className={styles.dateTag}
+            onClick={() => Toast.show(`入住: ${searchParams.checkIn} - 离店: ${searchParams.checkOut}`)}
+          >
+            <CalendarOutline />
+            {searchParams.checkIn} - {searchParams.checkOut}
+          </Tag>
+        </div>
 
       </div>
 
       {/* 酒店列表 */}
       <div className={styles.listContainer}>
         <List>
-          {hotels.map(hotel => renderHotelCard(hotel))}
+          {displayHotels.map(hotel => renderHotelCard(hotel))}
         </List>
         
-        {/* 无限滚动加载组件 - 这是实现"上滑自动加载"的关键 */}
+        {/* 无限滚动加载组件 */}
         <InfiniteScroll loadMore={loadMore} hasMore={hasMore} threshold={250}>
           <div className={styles.loadingText}>
-            {hasMore ? '加载中...' : '没有更多了'}
+            {hasMore ? '加载中...' : filteredAndSortedHotels.length === 0 ? '未找到符合条件的酒店' : '没有更多了'}
           </div>
         </InfiniteScroll>
       </div>
 
       {/* 详细筛选面板（模态框） */}
-      {/* 由于实现较复杂，这里先预留位置，你可以后续完善 */}
+    
       {filterVisible && (
         <div className={styles.filterPanel}>
-          {/* 筛选面板内容 */}
           <div className={styles.filterHeader}>
             <span>筛选条件</span>
             <button onClick={() => setFilterVisible(false)}>关闭</button>
