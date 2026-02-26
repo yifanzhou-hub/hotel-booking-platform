@@ -7,7 +7,7 @@ import {
   Grid,
   Toast
 } from 'antd-mobile';
-import { SearchOutline, EnvironmentOutline, CalendarOutline } from 'antd-mobile-icons';
+
 import { useNavigate } from 'react-router-dom';
 import styles from './index.module.css';
 
@@ -77,7 +77,7 @@ const Home = () => {
           className={styles.location}
           onClick={() => Toast.show('城市选择功能开发中')}
         >
-          <EnvironmentOutline />
+          
           <span>{searchParams.city}</span>
         </div>
         
@@ -100,7 +100,7 @@ const Home = () => {
         >
           {() => (
             <div className={styles.dateItem}>
-              <CalendarOutline />
+              
               <span>{searchParams.checkIn}</span>
             </div>
           )}
@@ -116,7 +116,7 @@ const Home = () => {
         >
           {() => (
             <div className={styles.dateItem}>
-              <CalendarOutline />
+            
               <span>{searchParams.checkOut}</span>
             </div>
           )}

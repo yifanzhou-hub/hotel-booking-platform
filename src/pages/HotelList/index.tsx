@@ -2,9 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   SearchBar, 
-  DatePicker, 
- 
-  Grid, 
+
   List, 
   InfiniteScroll,
   Selector,

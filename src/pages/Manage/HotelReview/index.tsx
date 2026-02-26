@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Table, Button, Tag, Space, Input, Select, Card, Row, Col, 
+  Table, Button, Tag, Input, Select, Card, Row, Col, 
   message, Modal, DatePicker, Tooltip, Statistic 
 } from 'antd';
 import { 
@@ -278,9 +278,13 @@ const HotelReviewPage = () => {
   };
 
   // 初始化加载
-  useEffect(() => {
-    handleSearch();
-  }, []);
+useEffect(() => {
+  handleSearch();
+}, [handleSearch]);  // 添加 handleSearch 到依赖数组
+
+useEffect(() => {
+  handleSearch();
+}, [handleSearch]);
 
   return (
     <div className={styles.container}>
