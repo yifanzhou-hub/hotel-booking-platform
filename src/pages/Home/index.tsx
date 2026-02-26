@@ -33,6 +33,7 @@ const Home = () => {
   const quickCities = ['北京', '上海', '广州', '深圳', '杭州', '成都'];
 
   return (
+
     <div className={styles.container}>
       {/* 顶部搜索栏 */}
       <div className={styles.searchSection}>

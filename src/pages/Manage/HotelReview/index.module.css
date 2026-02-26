@@ -1,0 +1,44 @@
+.container {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #1890ff;
+}
+
+.subTitle {
+  color: #666;
+  margin-bottom: 0;
+}
+
+.searchBar {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.searchBarRow {
+  margin-bottom: 12px;
+}
+
+.tableCard {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.operationCell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
